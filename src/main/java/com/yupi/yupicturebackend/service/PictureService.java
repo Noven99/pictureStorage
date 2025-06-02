@@ -23,18 +23,10 @@ import java.util.List;
  * @createDate 2025-05-28 19:35:10
  */
 public interface PictureService extends IService<Picture> {
-    /**
-     * 上传图片
-     *
-     * @param inputSource
-     * @param pictureUploadRequest
-     * @param loginUser
-     * @return
-     */
+    //上传图片
     PictureVO uploadPicture(Object inputSource,
                             PictureUploadRequest pictureUploadRequest,
                             User loginUser);
-
 
     //获取查询对象
     QueryWrapper<Picture> getQueryWrapper(PictureQueryRequest pictureQueryRequest);
@@ -48,7 +40,7 @@ public interface PictureService extends IService<Picture> {
     void validPicture(Picture picture);
 
 
-     //图片审核
+    //图片审核
     void doPictureReview(PictureReviewRequest pictureReviewRequest, User loginUser);
 
     //填充审核参数
@@ -60,7 +52,13 @@ public interface PictureService extends IService<Picture> {
             User loginUser
     );
 
-
     //清理图片文件
     void clearPictureFile(Picture oldPicture);
+
+    //校验空间图片权限
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    void deletePicture(long pictureId, User loginUser);
+
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
 }
