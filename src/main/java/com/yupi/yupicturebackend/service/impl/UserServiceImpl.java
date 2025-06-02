@@ -97,13 +97,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         // 1. 校验
         if (StrUtil.hasBlank(userAccount, userPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Invalid parameters");
         }
         if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号错误");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Invalid account");
         }
         if (userPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Invalid password");
         }
         // 2. 加密
         String encryptPassword = getEncryptPassword(userPassword);
