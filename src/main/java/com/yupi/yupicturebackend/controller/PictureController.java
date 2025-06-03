@@ -111,6 +111,12 @@ public class PictureController {
         long id = pictureUpdateRequest.getId();
         Picture oldPicture = pictureService.getById(id);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
+
+        // 保留审核相关字段
+        BeanUtils.copyProperties(request, picture);
+        picture.setReviewStatus(oldPicture.getReviewStatus());
+        picture.setReviewMessage(oldPicture.getReviewMessage());
+
         //补充审核参数
         User loginUser = userService.getLoginUser(request);
         pictureService.fillReviewParams(oldPicture, loginUser);
@@ -214,7 +220,7 @@ public class PictureController {
         long current = pictureQueryRequest.getCurrent();
         long size = pictureQueryRequest.getPageSize();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 30, ErrorCode.PARAMS_ERROR);
         // 普通用户默认只能看到审核通过的数据
         pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         // 查询缓存，缓存中没有，再查询数据库

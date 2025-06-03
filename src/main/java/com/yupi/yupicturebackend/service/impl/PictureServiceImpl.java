@@ -138,6 +138,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture picture = new Picture();
         // 补充设置 spaceId
         picture.setSpaceId(spaceId);
+        picture.setUserId(loginUser.getId());  // 先设置 userId
+        //补充审核参数
+        this.fillReviewParamsPlus(picture, loginUser);
+        log.info("审核参数设置后 - reviewStatus: {}", picture.getReviewStatus());
 
         picture.setUrl(uploadPictureResult.getUrl());
         picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
@@ -153,8 +157,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
         picture.setUserId(loginUser.getId());
-        //补充审核参数
-        this.fillReviewParams(picture, loginUser);
+
         // 如果 pictureId 不为空，表示更新，否则是新增
         if (pictureId != null) {
             // 如果是更新，需要补充 id 和编辑时间
@@ -164,6 +167,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 开启事务
         Long finalSpaceId = spaceId;
         transactionTemplate.execute(status -> {
+            log.info("事务内 - 保存前的 reviewStatus: {}", picture.getReviewStatus());
             boolean result = this.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "Picture upload failed");
             if (finalSpaceId != null) {
@@ -343,6 +347,43 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         }
     }
 
+    @Override
+    public void fillReviewParamsPlus(Picture picture, User loginUser) {
+        log.info("开始设置审核参数 - picture: {}, loginUser: {}", picture, loginUser);
+        if (picture == null || loginUser == null) {
+            log.warn("picture 或 loginUser 为 null");
+            return;
+        }
+
+        boolean isPrivateSpace = picture.getSpaceId() != null;
+        boolean isOwner = loginUser.getId().equals(picture.getUserId());
+        boolean isAdmin = userService.isAdmin(loginUser);
+        log.info("判断结果 - isPrivateSpace: {}, isOwner: {}, isAdmin: {}",
+                isPrivateSpace, isOwner, isAdmin);
+
+        if (isPrivateSpace && isOwner) {
+            // 私有空间所有者自动过审
+            picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+            picture.setReviewerId(loginUser.getId());
+            picture.setReviewMessage("私有空间图片自动审核通过");
+            picture.setReviewTime(new Date());
+            log.info("设置为自动通过 - reviewStatus: {}", picture.getReviewStatus());
+        } else if (isAdmin) {
+            // 管理员自动过审
+            picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
+            picture.setReviewerId(loginUser.getId());
+            picture.setReviewMessage("管理员操作自动通过");
+            picture.setReviewTime(new Date());
+            log.info("设置为自动通过 - reviewStatus: {}", picture.getReviewStatus());
+        } else {
+            // 其他情况需要审核
+            picture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.getValue());
+            picture.setReviewMessage("等待管理员审核");
+            log.info("设置为待审核 - reviewStatus: {}", picture.getReviewStatus());
+        }
+    }
+
+
     //批量抓取和创建图片
     @Override
     public Integer uploadPictureByBatch(PictureUploadByBatchRequest pictureUploadByBatchRequest, User loginUser) {
@@ -489,6 +530,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         checkPictureAuth(loginUser, oldPicture);
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
+        picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue()); // 确保更新时设置为 1
         // 操作数据库
         boolean result = this.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
