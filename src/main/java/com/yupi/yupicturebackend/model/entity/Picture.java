@@ -125,6 +125,12 @@ public class Picture implements Serializable {
     private Long reviewerId;
 
     /**
+     * 图片主色调
+     */
+    private String picColor;
+
+
+    /**
      * 审核时间
      */
     private Date reviewTime;
