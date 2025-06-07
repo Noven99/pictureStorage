@@ -11,6 +11,7 @@ import com.yupi.yupicturebackend.exception.ErrorCode;
 import com.yupi.yupicturebackend.exception.ThrowUtils;
 import com.yupi.yupicturebackend.model.dto.sapce.SpaceAddRequest;
 import com.yupi.yupicturebackend.model.dto.sapce.SpaceQueryRequest;
+import com.yupi.yupicturebackend.model.dto.sapce.analyze.SpaceAnalyzeRequest;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
 import com.yupi.yupicturebackend.model.entity.User;
@@ -193,6 +194,18 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
             }
         }
     }
+
+    //校验空间权限
+    @Override
+    public void checkSpaceAuth(User loginUser, Space space) {
+        //经本人或管理员可访问
+        if (!space.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+    }
+
+
+
 
 }
 
