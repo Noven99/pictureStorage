@@ -40,7 +40,7 @@ public class GetImagePageUrlApi {
             HttpResponse response = HttpRequest.post(url)
                     .header("Acs-Token",acsToken)  // 需要增加请求头
                     .form(formData)
-                    .timeout(5000)
+                    .timeout(50000)
                     .execute();
             // 判断响应状态
             if (HttpStatus.HTTP_OK != response.getStatus()) {

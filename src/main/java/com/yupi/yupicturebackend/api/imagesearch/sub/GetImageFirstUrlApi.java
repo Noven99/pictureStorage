@@ -24,7 +24,7 @@ public class GetImageFirstUrlApi {
         try {
             // 使用 Jsoup 获取 HTML 内容
             Document document = Jsoup.connect(url)
-                    .timeout(5000)
+                    .timeout(50000)
                     .get();
 
             // 获取所有 <script> 标签
