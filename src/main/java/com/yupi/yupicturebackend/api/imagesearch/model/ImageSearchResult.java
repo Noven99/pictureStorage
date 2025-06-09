@@ -2,6 +2,9 @@ package com.yupi.yupicturebackend.api.imagesearch.model;
 
 import lombok.Data;
 
+/**
+ * 图片搜索结果
+ */
 @Data
 public class ImageSearchResult {
 

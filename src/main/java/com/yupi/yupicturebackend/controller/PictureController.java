@@ -345,7 +345,9 @@ public class PictureController {
         return ResultUtils.success(uploadCount);
     }
 
-/*    *//**
+    /*    */
+
+    /**
      * 以图搜图（）
      *//*
     @PostMapping("/search/picture")
@@ -365,9 +367,8 @@ public class PictureController {
         return ResultUtils.success(resultList);
     }*/
 
-    /**
-     * 以图搜图
-     */
+
+    //以图搜图
     @PostMapping("/search/picture")
     public BaseResponse<List<ImageSearchResult>> searchPictureByPicture(@RequestBody SearchPictureByPictureRequest searchPictureByPictureRequest) {
         ThrowUtils.throwIf(searchPictureByPictureRequest == null, ErrorCode.PARAMS_ERROR);
@@ -375,9 +376,11 @@ public class PictureController {
         ThrowUtils.throwIf(pictureId == null || pictureId <= 0, ErrorCode.PARAMS_ERROR);
         Picture picture = pictureService.getById(pictureId);
         ThrowUtils.throwIf(picture == null, ErrorCode.NOT_FOUND_ERROR);
-        List<ImageSearchResult> resultList = ImageSearchApiFacade.searchImage(picture.getUrl());
+        //这里用 ThumbnailUrl 来搜图，但是这个格式仅仅是压缩后的格式，我们前面定制了规则，如果原图不到20kb,不压缩，所以是搜索不到的
+        List<ImageSearchResult> resultList = ImageSearchApiFacade.searchImage(picture.getThumbnailUrl());
         return ResultUtils.success(resultList);
     }
+
 
     //按照颜色搜索
     @PostMapping("/search/color")

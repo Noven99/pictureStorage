@@ -11,6 +11,9 @@ import org.jsoup.select.Elements;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 获取图片列表接口的 Api（Step 2）
+ */
 @Slf4j
 public class GetImageFirstUrlApi {
 
@@ -24,7 +27,7 @@ public class GetImageFirstUrlApi {
         try {
             // 使用 Jsoup 获取 HTML 内容
             Document document = Jsoup.connect(url)
-                    .timeout(50000)
+                    .timeout(5000)
                     .get();
 
             // 获取所有 <script> 标签
@@ -54,8 +57,8 @@ public class GetImageFirstUrlApi {
     }
 
     public static void main(String[] args) {
-        // 请求目标 URL(这个测试地址就是第一步以图搜图出来的地址)
-        String url = "https://graph.baidu.com/s?card_key=&entrance=GENERAL&extUiData%5BisLogoShow%5D=1&f=all&isLogoShow=1&session_id=270171128940461199&sign=12636e97cd54acd88139901749034218&tpl_from=pc";
+        // 请求目标 URL
+        String url = "https://graph.baidu.com/s?card_key=&entrance=GENERAL&extUiData[isLogoShow]=1&f=all&isLogoShow=1&session_id=16250747570487381669&sign=1265ce97cd54acd88139901733452612&tpl_from=pc";
         String imageFirstUrl = getImageFirstUrl(url);
         System.out.println("搜索成功，结果 URL：" + imageFirstUrl);
     }

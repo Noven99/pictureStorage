@@ -65,7 +65,9 @@ public class CosManager {
         // 图片压缩（转成 webp 格式）
         String webpKey = FileUtil.mainName(key) + ".webp";
         PicOperations.Rule compressRule = new PicOperations.Rule();
-        compressRule.setRule("imageMogr2/format/webp");
+        //这里如果不加限制，转化后的webp格式可能会比原来的jpg格式还要大，修改规则：格式转换 + 禁用 Alpha + 质量压缩
+        // minsize/1 当处理后图片体积大于原图时，返回原图不处理。该参数需要搭配以上三个任意一个质量参数一起使用。
+        compressRule.setRule("imageMogr2/format/webp/quality/80/ignore-error/1/minsize/1");
         compressRule.setBucket(cosClientConfig.getBucket());
         compressRule.setFileId(webpKey);
         rules.add(compressRule);
