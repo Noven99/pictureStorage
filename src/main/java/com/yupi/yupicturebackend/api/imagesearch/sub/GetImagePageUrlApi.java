@@ -42,9 +42,11 @@ public class GetImagePageUrlApi {
         long uptime = System.currentTimeMillis();
         // 请求地址
         String url = "https://graph.baidu.com/upload?uptime=" + uptime;
+        String acsToken= "025"; //这个换成任意数字都可以
         try {
             // 2. 发送请求
             HttpResponse httpResponse = HttpRequest.post(url)
+                    .header("Acs-Token",acsToken)  // 需要增加请求头
                     .form(formData)
                     .timeout(5000)
                     .execute();

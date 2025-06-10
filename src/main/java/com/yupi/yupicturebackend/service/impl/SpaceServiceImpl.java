@@ -142,7 +142,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "The space level cannot be empty");
             }
             if (spaceType == null) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "空间类型不能为空");
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "The space type cannot be empty");
             }
         }
         // 修改数据时，如果要改空间级别
@@ -154,7 +154,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         }
         // 修改数据时，如果要改空间级别
         if (spaceType != null && spaceTypeEnum == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "空间类型不存在");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "The space type does not exist");
         }
     }
 
