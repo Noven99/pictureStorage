@@ -59,11 +59,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (!userPassword.equals(checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
         }
+        // 👇 在此处插入：判断用户总数是否达到上限（8 位 ID 最多支持 99999999 个用户）
+        long count = this.baseMapper.selectCount(null);
+        if (count >= 99999999L) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户数量已达上限，无法继续注册");
+        }
+        // 👆 插入结束
         // 2. 检查是否重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
-        long count = this.baseMapper.selectCount(queryWrapper);
-        if (count > 0) {
+        long dbcount = this.baseMapper.selectCount(queryWrapper);
+        if (dbcount > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "Duplicate account");
         }
         // 3. 加密
@@ -74,6 +80,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserPassword(encryptPassword);
         user.setUserName(userAccount);
         user.setUserRole(UserRoleEnum.USER.getValue());
+
+        // 新增：生成唯一的 8 位 ID
+        Long newId = generateUnique8DigitId();
+        user.setId(newId);
+
         boolean saveResult = this.save(user);
         if (!saveResult) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
@@ -215,6 +226,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return new ArrayList<>();
         }
         return userList.stream().map(this::getUserVO).collect(Collectors.toList());
+    }
+
+    private Long generateUnique8DigitId() {
+        long min = 10000000L;
+        long max = 99999999L;
+        long newId;
+        do {
+            newId = min + (long)(Math.random() * (max - min + 1));
+        } while (this.getById(newId) != null); // 防止 ID 冲突
+        return newId;
     }
 
 }

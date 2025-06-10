@@ -16,7 +16,7 @@ public class User implements Serializable {
     /**
      * id
      */
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.INPUT) //表示 ID 需要手动设置。
     private Long id;
 
     /**
