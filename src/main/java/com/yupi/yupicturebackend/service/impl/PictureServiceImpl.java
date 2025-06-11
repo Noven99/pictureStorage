@@ -32,6 +32,7 @@ import com.yupi.yupicturebackend.mapper.PictureMapper;
 import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.UserService;
 import com.yupi.yupicturebackend.utils.ColorSimilarUtils;
+import com.yupi.yupicturebackend.utils.ColorTransformUtils;
 import com.yupi.yupicturebackend.utils.HexColorExpander;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -272,7 +273,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         picture.setPicHeight(uploadPictureResult.getPicHeight());
         picture.setPicScale(uploadPictureResult.getPicScale());
         picture.setPicFormat(uploadPictureResult.getPicFormat());
-        picture.setPicColor(HexColorExpander.expandHexColor(uploadPictureResult.getPicColor()));
+        picture.setPicColor(ColorTransformUtils.getStandardColor(uploadPictureResult.getPicColor()));
         picture.setUserId(loginUser.getId());
 
         // 如果 pictureId 不为空，表示更新，否则是新增

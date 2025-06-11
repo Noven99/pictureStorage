@@ -2,6 +2,7 @@ package com.yupi.yupicturebackend.model.vo;
 
 import cn.hutool.json.JSONUtil;
 import com.yupi.yupicturebackend.model.entity.Picture;
+import com.yupi.yupicturebackend.utils.ColorTransformUtils;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -143,6 +144,7 @@ public class PictureVO implements Serializable {
         BeanUtils.copyProperties(picture, pictureVO);
         // 类型不同，需要转换  
         pictureVO.setTags(JSONUtil.toList(picture.getTags(), String.class));
+        pictureVO.setPicColor(ColorTransformUtils.toCssColor(picture.getPicColor()));
         return pictureVO;
     }
 }

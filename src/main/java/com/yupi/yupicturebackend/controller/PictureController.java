@@ -43,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -433,5 +434,21 @@ public class PictureController {
         return ResultUtils.success(task);
     }
 
-
+    /**
+     * 多文件上传（兼容单文件逻辑）
+     */
+    @PostMapping("/upload/multi")
+    @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_UPLOAD)
+    public BaseResponse<List<PictureVO>> uploadPictureMulti(
+            @RequestPart("files") List<MultipartFile> multipartFiles,
+            PictureUploadRequest pictureUploadRequest,
+            HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        List<PictureVO> resultList = new ArrayList<>();
+        for (MultipartFile file : multipartFiles) {
+            PictureVO pictureVO = pictureService.uploadPicture(file, pictureUploadRequest, loginUser);
+            resultList.add(pictureVO);
+        }
+        return ResultUtils.success(resultList);
+    }
 }

@@ -48,21 +48,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         //1，校验参数
         if (StrUtil.hasBlank(userAccount, userPassword, checkPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Parameter is empty");
         }
         if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户账号过短");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User account is too short");
         }
         if (userPassword.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户密码过短");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User password is too short");
         }
         if (!userPassword.equals(checkPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "The passwords you entered twice do not match");
         }
         // 👇 在此处插入：判断用户总数是否达到上限（8 位 ID 最多支持 99999999 个用户）
         long count = this.baseMapper.selectCount(null);
         if (count >= 99999999L) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户数量已达上限，无法继续注册");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "User limit reached. Unable to register any more");
         }
         // 👆 插入结束
         // 2. 检查是否重复
@@ -87,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         boolean saveResult = this.save(user);
         if (!saveResult) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Register failed. Database error");
         }
         return user.getId();
     }
@@ -170,7 +170,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 先判断是否已登录
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         if (userObj == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Not login");
         }
         // 移除登录态
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
@@ -181,7 +181,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
         if (userQueryRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Request parameter is empty");
         }
         Long id = userQueryRequest.getId();
         String userAccount = userQueryRequest.getUserAccount();

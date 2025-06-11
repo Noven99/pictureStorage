@@ -3,28 +3,32 @@ package com.yupi.yupicturebackend.utils;
 public class HexColorExpander {
 
     public static String expandHexColor(String compressed) {
-        // 去除可能存在的0x前缀
-        String input = compressed.startsWith("0x") ? compressed.substring(2) : compressed;
-        int length = input.length();
-        
-        // 检查输入长度
-        if (length != 3 && length != 6) {
+        if (compressed == null) {
+            throw new IllegalArgumentException("Color cannot be null");
+        }
+
+        String input = compressed.trim()
+                .replaceFirst("^#", "")     // 去掉#前缀
+                .replaceFirst("^0x", "");   // 去掉0x前缀
+
+        if (input.length() == 3) {
+            // 检查合法性
+            if (!input.matches("[0-9a-fA-F]{3}")) {
+                throw new IllegalArgumentException("Invalid color format");
+            }
+            // #abc -> #aabbcc
+            StringBuilder expanded = new StringBuilder();
+            for (char c : input.toCharArray()) {
+                expanded.append(c).append(c);
+            }
+            return "#" + expanded.toString();
+        } else if (input.length() == 6) {
+            if (!input.matches("[0-9a-fA-F]{6}")) {
+                throw new IllegalArgumentException("Invalid color format");
+            }
+            return "#" + input.toLowerCase();
+        } else {
             throw new IllegalArgumentException("Invalid color format");
         }
-        
-        StringBuilder expanded = new StringBuilder();
-
-        // 处理三个颜色分量
-        for (int i = 0; i < 3; i++) {
-            char current = input.charAt(i);
-            if (length == 3) {
-                // 如果长度为3，重复当前字符两次
-                expanded.append(current).append(current);
-            } else {
-                // 如果长度为6，直接复制两个字符
-                expanded.append(input.charAt(i * 2)).append(input.charAt(i * 2 + 1));
-            }
-        }
-        return "0x" + expanded.toString();
     }
 }
