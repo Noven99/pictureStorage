@@ -22,17 +22,17 @@ public class UrlPictureUpload extends PictureUploadTemplate {
     @Override  
     protected void validPicture(Object inputSource) {  
         String fileUrl = (String) inputSource;  
-        ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), ErrorCode.PARAMS_ERROR, "文件地址不能为空");
+        ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), ErrorCode.PARAMS_ERROR, "The file address cannot be empty");
         try {
             // 1. 验证 URL 格式
             new URL(fileUrl); // 验证是否是合法的 URL
         } catch (MalformedURLException e) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件地址格式不正确");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "File address format is incorrect");
         }
 
         // 2. 校验 URL 协议
         ThrowUtils.throwIf(!(fileUrl.startsWith("http://") || fileUrl.startsWith("https://")),
-                ErrorCode.PARAMS_ERROR, "仅支持 HTTP 或 HTTPS 协议的文件地址");
+                ErrorCode.PARAMS_ERROR, "Only HTTP or HTTPS protocol file addresses are supported");
 
         // 3. 发送 HEAD 请求以验证文件是否存在
         HttpResponse response = null;
@@ -48,7 +48,7 @@ public class UrlPictureUpload extends PictureUploadTemplate {
                 // 允许的图片类型
                 final List<String> ALLOW_CONTENT_TYPES = Arrays.asList("image/jpeg", "image/jpg", "image/png", "image/webp");
                 ThrowUtils.throwIf(!ALLOW_CONTENT_TYPES.contains(contentType.toLowerCase()),
-                        ErrorCode.PARAMS_ERROR, "文件类型错误");
+                        ErrorCode.PARAMS_ERROR, "File format error");
             }
             // 5. 校验文件大小
             String contentLengthStr = response.header("Content-Length");
@@ -56,9 +56,9 @@ public class UrlPictureUpload extends PictureUploadTemplate {
                 try {
                     long contentLength = Long.parseLong(contentLengthStr);
                     final long Five_MB = 5 * 1024 * 1024L; // 限制文件大小为 5MB
-                    ThrowUtils.throwIf(contentLength > Five_MB, ErrorCode.PARAMS_ERROR, "文件大小不能超过 5M");
+                    ThrowUtils.throwIf(contentLength > Five_MB, ErrorCode.PARAMS_ERROR, "The file size cannot exceed 5M");
                 } catch (NumberFormatException e) {
-                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小格式错误");
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "File size format error");
                 }
             }
         } finally {

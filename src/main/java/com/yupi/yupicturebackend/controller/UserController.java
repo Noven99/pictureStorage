@@ -38,7 +38,7 @@ public class UserController {
         long result = userService.userRegister(userAccount, userPassword, checkPassword);
         // 校验 ID 是否超过 8 位
         if (result > 99999999L) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户 ID 超过 8 位");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "The user ID exceeds 8 digits");
         }
         return ResultUtils.success(result);
     }

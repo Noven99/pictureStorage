@@ -225,7 +225,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Long oldPicSize = 0L;
         if (pictureId != null) {
             Picture oldPicture = this.getById(pictureId);
-            ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
+            ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "Image does not exist");
             oldPicSize = oldPicture.getPicSize();
             // 没传 spaceId，则复用原有图片的 spaceId
             if (spaceId == null) {
@@ -235,7 +235,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             } else {
                 // 传了 spaceId，必须和原有图片一致
                 if (ObjUtil.notEqual(spaceId, oldPicture.getSpaceId())) {
-                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "空间 id 不一致");
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "Space id does not match");
                 }
             }
         }
@@ -455,7 +455,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 已是该状态
         if (oldPicture.getReviewStatus().equals(reviewStatus)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请勿重复审核");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Please do not review repeatedly");
         }
         // 更新审核状态
         Picture updatePicture = new Picture();
@@ -537,11 +537,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             document = Jsoup.connect(fetchUrl).get();
         } catch (IOException e) {
             log.error("获取页面失败", e);
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取页面失败");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Failed to obtain the page");
         }
         Element div = document.getElementsByClass("dgControl").first();
         if (ObjUtil.isNull(div)) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取元素失败");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Failed to obtain the element");
         }
         Elements imgElementList = div.select("img.mimg");
         int uploadCount = 0;
@@ -678,9 +678,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 2. 校验空间权限
         Space space = spaceService.getById(spaceId);
-        ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "Space does not exist");
         if (!loginUser.getId().equals(space.getUserId())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "No space access permissions");
         }
         // 3. 查询该空间下所有图片（必须有主色调）
         List<Picture> pictureList = this.lambdaQuery()
@@ -730,9 +730,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         ThrowUtils.throwIf(loginUser == null, ErrorCode.NO_AUTH_ERROR);
         // 2. 校验空间权限
         Space space = spaceService.getById(spaceId);
-        ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+        ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "Space does not exist");
         if (!loginUser.getId().equals(space.getUserId())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有空间访问权限");
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "No space access permissions");
         }
 
         // 3. 查询指定图片，仅选择需要的字段

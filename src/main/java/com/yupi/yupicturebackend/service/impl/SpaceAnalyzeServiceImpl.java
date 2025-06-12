@@ -65,7 +65,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             // 查询全部或公共图库逻辑
             // 仅管理员可以访问
             boolean isAdmin = userService.isAdmin(loginUser);
-            ThrowUtils.throwIf(!isAdmin, ErrorCode.NO_AUTH_ERROR, "无权访问空间");
+            ThrowUtils.throwIf(!isAdmin, ErrorCode.NO_AUTH_ERROR, "No space access permissions");
             // 统计公共图库的资源使用
             QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
             queryWrapper.select("picSize");
@@ -92,7 +92,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             ThrowUtils.throwIf(spaceId == null || spaceId <= 0, ErrorCode.PARAMS_ERROR);
             // 获取空间信息
             Space space = spaceService.getById(spaceId);
-            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "Space does not exist");
 
             // 权限校验：仅空间所有者或管理员可访问
             spaceService.checkSpaceAuth(loginUser, space);
@@ -256,7 +256,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         ThrowUtils.throwIf(spaceRankAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
 
         // 仅管理员可查看空间排行
-        ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无权查看空间排行");
+        ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "No permission to view space rankings");
 
         // 构造查询条件
         QueryWrapper<Space> queryWrapper = new QueryWrapper<>();
@@ -273,13 +273,13 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         // 检查权限
         if (spaceAnalyzeRequest.isQueryAll() || spaceAnalyzeRequest.isQueryPublic()) {
             // 全空间分析或者公共图库权限校验：仅管理员可访问
-            ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "无权访问公共图库");
+            ThrowUtils.throwIf(!userService.isAdmin(loginUser), ErrorCode.NO_AUTH_ERROR, "No access to the public library");
         } else {
             // 私有空间权限校验
             Long spaceId = spaceAnalyzeRequest.getSpaceId();
             ThrowUtils.throwIf(spaceId == null || spaceId <= 0, ErrorCode.PARAMS_ERROR);
             Space space = spaceService.getById(spaceId);
-            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "Space does not exist");
             spaceService.checkSpaceAuth(loginUser, space);
         }
     }
@@ -301,7 +301,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             queryWrapper.eq("spaceId", spaceId);
             return;
         }
-        throw new BusinessException(ErrorCode.PARAMS_ERROR, "未指定查询范围");
+        throw new BusinessException(ErrorCode.PARAMS_ERROR, "The query range is not specified");
     }
 
 

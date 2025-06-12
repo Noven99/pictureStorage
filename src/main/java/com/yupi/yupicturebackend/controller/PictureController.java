@@ -170,7 +170,7 @@ public class PictureController {
             //User loginUser = userService.getLoginUser(request);
             //pictureService.checkPictureAuth(loginUser, picture);
             space = spaceService.getById(spaceId);
-            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
+            ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "Space does not exist");
         }
         // 获取权限列表
         User loginUser = userService.getLoginUser(request);
@@ -301,8 +301,8 @@ public class PictureController {
     @GetMapping("/tag_category")
     public BaseResponse<PictureTagCategory> listPictureTagCategory() {
         PictureTagCategory pictureTagCategory = new PictureTagCategory();
-        List<String> tagList = Arrays.asList("Nature", "Life", "Art", "Documentary", "Emotion", "Animal", "Scene", "Conception", "Street");
-        List<String> categoryList = Arrays.asList("Personal", "Master", "Enterprise", "Blogger", "AI");
+        List<String> tagList = Arrays.asList("Adventure", "Emotion", "Experimental", "Geometry", "Introspection", "Nature", "Record", "Street", "Theme");
+        List<String> categoryList = Arrays.asList("AIGC", "Blogger", "Life-lover", "Master", "Media", "Personal", "Unknown");
         pictureTagCategory.setTagList(tagList);
         pictureTagCategory.setCategoryList(categoryList);
         return ResultUtils.success(pictureTagCategory);

@@ -72,7 +72,7 @@ public abstract class PictureUploadTemplate {
             return buildResult(originFilename, file, uploadPath, imageInfo);
         } catch (Exception e) {
             log.error("图片上传到对象存储失败", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Upload failed");
         } finally {
             // 6. 清理临时文件
             deleteTempFile(file);

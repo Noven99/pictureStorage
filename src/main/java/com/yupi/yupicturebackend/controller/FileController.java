@@ -49,7 +49,7 @@ public class FileController {
             return ResultUtils.success(filepath);
         } catch (Exception e) {
             log.error("file upload error, filepath = " + filepath, e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Upload failed");
         } finally {
             if (file != null) {
                 // 删除临时文件
@@ -84,7 +84,7 @@ public class FileController {
             response.getOutputStream().flush();
         } catch (Exception e) {
             log.error("file download error, filepath = " + filepath, e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "下载失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Download failed");
         } finally {
             if (cosObjectInput != null) {
                 cosObjectInput.close();

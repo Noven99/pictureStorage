@@ -52,7 +52,7 @@ public class AliYunAiApi {
             String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
             if (response.getStatusLine().getStatusCode() != 200) {
                 log.error("请求异常：{}", responseBody);
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI 扩图失败");
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI expansion failed");
             }
 
             CreateOutPaintingTaskResponse paintingResponse = JSONUtil.toBean(responseBody, CreateOutPaintingTaskResponse.class);
@@ -60,12 +60,12 @@ public class AliYunAiApi {
             if (StrUtil.isNotBlank(errorCode)) {
                 String errorMessage = paintingResponse.getMessage();
                 log.error("AI 扩图失败，errorCode:{}, errorMessage:{}", errorCode, errorMessage);
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI 扩图接口响应异常");
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "Abnormal response of AI expansion interface");
             }
             return paintingResponse;
         } catch (IOException e) {
             log.error("创建扩图任务时发生错误", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统错误，请稍后再试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "System error. Please try again later");
         }
     }
 
@@ -77,7 +77,7 @@ public class AliYunAiApi {
      */
     public GetOutPaintingTaskResponse getOutPaintingTask(String taskId) {
         if (StrUtil.isBlank(taskId)) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "任务 id 不能为空");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "Task id can not be empty");
         }
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet httpGet = new HttpGet(String.format(GET_OUT_PAINTING_TASK_URL, taskId));
@@ -86,12 +86,12 @@ public class AliYunAiApi {
             String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
             if (response.getStatusLine().getStatusCode() != 200) {
                 log.error("请求异常：{}", responseBody);
-                throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取任务失败");
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "Failed to obtain the task");
             }
             return JSONUtil.toBean(responseBody, GetOutPaintingTaskResponse.class);
         } catch (IOException e) {
             log.error("获取图片 task 信息发生错误", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统错误，请稍后再试");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "System error. Please try again later");
         }
     }
 }

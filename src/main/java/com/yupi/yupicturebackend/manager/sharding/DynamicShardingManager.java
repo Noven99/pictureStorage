@@ -132,7 +132,7 @@ public class DynamicShardingManager {
         try (ShardingSphereConnection connection = dataSource.getConnection().unwrap(ShardingSphereConnection.class)) {
             return connection.getContextManager();
         } catch (SQLException e) {
-            throw new RuntimeException("获取 ShardingSphere ContextManager 失败", e);
+            throw new RuntimeException("Obtain ShardingSphere ContextManager failed", e);
         }
     }
 }
