@@ -23,13 +23,17 @@ import com.yupi.yupicturebackend.model.dto.file.UploadPictureResult;
 import com.yupi.yupicturebackend.model.dto.picture.*;
 import com.yupi.yupicturebackend.model.entity.Picture;
 import com.yupi.yupicturebackend.model.entity.Space;
+import com.yupi.yupicturebackend.model.entity.SpaceUser;
 import com.yupi.yupicturebackend.model.entity.User;
 import com.yupi.yupicturebackend.model.enums.PictureReviewStatusEnum;
+import com.yupi.yupicturebackend.model.enums.SpaceRoleEnum;
+import com.yupi.yupicturebackend.model.enums.SpaceTypeEnum;
 import com.yupi.yupicturebackend.model.vo.PictureVO;
 import com.yupi.yupicturebackend.model.vo.UserVO;
 import com.yupi.yupicturebackend.service.PictureService;
 import com.yupi.yupicturebackend.mapper.PictureMapper;
 import com.yupi.yupicturebackend.service.SpaceService;
+import com.yupi.yupicturebackend.service.SpaceUserService;
 import com.yupi.yupicturebackend.service.UserService;
 import com.yupi.yupicturebackend.utils.ColorSimilarUtils;
 import com.yupi.yupicturebackend.utils.ColorTransformUtils;
@@ -77,6 +81,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     private TransactionTemplate transactionTemplate;
     @Resource
     private AliYunAiApi aliYunAiApi;
+    @Resource
+    private SpaceUserService spaceUserService;
 
  /*   @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
@@ -679,9 +685,27 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 2. 校验空间权限
         Space space = spaceService.getById(spaceId);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "Space does not exist");
-        if (!loginUser.getId().equals(space.getUserId())) {
+
+
+        SpaceTypeEnum spaceType = SpaceTypeEnum.getEnumByValue(space.getSpaceType()); // 假设Space有getType()
+        boolean hasPermission = false;
+
+     /*   if (!loginUser.getId().equals(space.getUserId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "No space access permissions");
+        }*/
+        if (spaceType == SpaceTypeEnum.PRIVATE) {
+            // 私有空间，只允许拥有者
+            hasPermission = loginUser.getId().equals(space.getUserId());
+        } else if (spaceType == SpaceTypeEnum.TEAM) {
+            // 团队空间，任何成员都行
+            SpaceUser spaceUser = spaceUserService.getSpaceUser(spaceId, loginUser.getId());
+            hasPermission = (spaceUser != null);
+        }
+
+        if (!hasPermission) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "No space access permissions");
         }
+
         // 3. 查询该空间下所有图片（必须有主色调）
         List<Picture> pictureList = this.lambdaQuery()
                 .eq(Picture::getSpaceId, spaceId)
@@ -706,8 +730,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                     // 越大越相似
                     return -ColorSimilarUtils.calculateSimilarity(targetColor, pictureColor);
                 }))
-                // 取前 12 个
-                .limit(2)
+                // 取前 10 个
+                .limit(10)
                 .collect(Collectors.toList());
 
         // 转换为 PictureVO

@@ -158,7 +158,12 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         return queryWrapper;
     }
 
-
+    @Override
+    public SpaceUser getSpaceUser(Long spaceId, Long userId) {
+        QueryWrapper<SpaceUser> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("spaceId", spaceId).eq("userId", userId);
+        return this.getOne(queryWrapper);
+    }
 
 
 }
