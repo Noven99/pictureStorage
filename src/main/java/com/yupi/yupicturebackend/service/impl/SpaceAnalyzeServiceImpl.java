@@ -208,7 +208,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
     }
 
     //空间用户上传行为分析
-    @Override
+    /*@Override
     public List<SpaceUserAnalyzeResponse> getSpaceUserAnalyze(SpaceUserAnalyzeRequest spaceUserAnalyzeRequest, User loginUser) {
         ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
         // 检查权限
@@ -241,6 +241,51 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
 
         // 查询结果并转换
         List<Map<String, Object>> queryResult = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        return queryResult.stream()
+                .map(result -> {
+                    String period = result.get("period").toString();
+                    Long count = ((Number) result.get("count")).longValue();
+                    return new SpaceUserAnalyzeResponse(period, count);
+                })
+                .collect(Collectors.toList());
+    }*/
+    @Override
+    public List<SpaceUserAnalyzeResponse> getSpaceUserAnalyze(SpaceUserAnalyzeRequest spaceUserAnalyzeRequest, User loginUser) {
+        ThrowUtils.throwIf(spaceUserAnalyzeRequest == null, ErrorCode.PARAMS_ERROR);
+
+        // 构造查询条件
+        QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
+        Long userId = spaceUserAnalyzeRequest.getUserId();
+        queryWrapper.eq(ObjUtil.isNotNull(userId), "userId", userId);
+
+        // 根据条件动态添加查询条件
+        if (!spaceUserAnalyzeRequest.isQueryPublic()) {
+            queryWrapper.isNotNull("spaceId"); // 非公共图库时，spaceId 不能为空
+        }
+
+        fillAnalyzeQueryWrapper(spaceUserAnalyzeRequest, queryWrapper);
+
+        // 时间维度分析逻辑
+        String timeDimension = spaceUserAnalyzeRequest.getTimeDimension();
+        switch (timeDimension) {
+            case "day":
+                queryWrapper.select("DATE_FORMAT(createTime, '%Y-%m-%d') AS period", "COUNT(*) AS count");
+                break;
+            case "week":
+                queryWrapper.select("YEARWEEK(createTime) AS period", "COUNT(*) AS count");
+                break;
+            case "month":
+                queryWrapper.select("DATE_FORMAT(createTime, '%Y-%m') AS period", "COUNT(*) AS count");
+                break;
+            default:
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "Unsupported time dimension");
+        }
+
+        queryWrapper.groupBy("period").orderByAsc("period");
+
+        // 查询并转换结果
+        List<Map<String, Object>> queryResult = pictureService.getBaseMapper().selectMaps(queryWrapper);
+        System.out.println("查询结果：" + queryResult);
         return queryResult.stream()
                 .map(result -> {
                     String period = result.get("period").toString();
@@ -284,7 +329,7 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
         }
     }
 
-    //根据请求对象封装查询条件
+/*    //根据请求对象封装查询条件
     private static void fillAnalyzeQueryWrapper(SpaceAnalyzeRequest spaceAnalyzeRequest, QueryWrapper<Picture> queryWrapper) {
         //全空间分析
         if (spaceAnalyzeRequest.isQueryAll()) {
@@ -302,6 +347,21 @@ public class SpaceAnalyzeServiceImpl extends ServiceImpl<SpaceMapper, Space>
             return;
         }
         throw new BusinessException(ErrorCode.PARAMS_ERROR, "The query range is not specified");
+    }*/
+
+    private static void fillAnalyzeQueryWrapper(SpaceAnalyzeRequest spaceAnalyzeRequest, QueryWrapper<Picture> queryWrapper) {
+        if (spaceAnalyzeRequest.isQueryPublic()) {
+            queryWrapper.isNull("spaceId"); // 查询公共图库
+        } else if (spaceAnalyzeRequest.isQueryAll()) {
+            queryWrapper.isNotNull("spaceId"); // 查询所有空间（排除公共图库）
+        } else {
+            Long spaceId = spaceAnalyzeRequest.getSpaceId();
+            if (spaceId != null) {
+                queryWrapper.eq("spaceId", spaceId); // 查询指定空间
+            } else {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "The query range is not specified");
+            }
+        }
     }
 
 

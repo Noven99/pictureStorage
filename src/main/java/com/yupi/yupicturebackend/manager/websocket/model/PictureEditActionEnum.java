@@ -5,10 +5,10 @@ import lombok.Getter;
 @Getter
 public enum PictureEditActionEnum {
 
-    ZOOM_IN("放大操作", "ZOOM_IN"),
-    ZOOM_OUT("缩小操作", "ZOOM_OUT"),
-    ROTATE_LEFT("左旋操作", "ROTATE_LEFT"),
-    ROTATE_RIGHT("右旋操作", "ROTATE_RIGHT");
+    ZOOM_IN("Zoom in operation", "ZOOM_IN"),
+    ZOOM_OUT("Zoom out operation", "ZOOM_OUT"),
+    ROTATE_LEFT("Left rotation operation", "ROTATE_LEFT"),
+    ROTATE_RIGHT("Right rotation operation", "ROTATE_RIGHT");
 
     private final String text;
     private final String value;
