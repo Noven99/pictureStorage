@@ -18,18 +18,24 @@ public class ColorTransformUtils {
      * @return
      */
     public static String getStandardColor(String color) {
-        // 每一种 rgb 色值都有可能只有一个 0，要转换为 00)
-        // 如果是六位，不用转换，如果是五位，要给第三位后面加个 0
-        // 示例：
-        // 0x080e0 => 0x0800e
-        // 如果是 5 位颜色值，添加一个 0 使其成为 6 位
-        if (color.length() == 6) {
-            StringBuilder sb = new StringBuilder(color);
-            sb.insert(3, "0");
-            color = sb.toString();
+        if (color == null || color.isEmpty()) {
+            return "#000000"; // 默认颜色
+        }
+        color = color.trim().toLowerCase().replace("0x", "").replace("#", "");
+
+        if (color.length() == 5) {
+            // 补零为 6 位：在最后补充一个 0
+            color = color + "0";
+        } else if (color.length() == 3) {
+            // 如果是 3 位颜色值，扩展为 6 位
+            color = "" + color.charAt(0) + color.charAt(0)
+                    + color.charAt(1) + color.charAt(1)
+                    + color.charAt(2) + color.charAt(2);
+        } else if (color.length() != 6) {
+            throw new IllegalArgumentException("Invalid color format: " + color);
         }
 
-        return color;
+        return "#" + color;
     }
 
     public static String toCssColor(String color) {
