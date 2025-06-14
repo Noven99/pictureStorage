@@ -259,6 +259,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         }
         UploadPictureResult uploadPictureResult = pictureUploadTemplate.uploadPicture(inputSource, uploadPathPrefix);
 
+        log.info("主色调计算结果（从上传返回）: {}", uploadPictureResult.getPicColor()); // 添加日志
+
         // 构造要入库的图片信息
         Picture picture = new Picture();
         picture.setSpaceId(spaceId);
@@ -285,6 +287,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             picture.setId(pictureId);
             picture.setEditTime(new Date());
         }
+
+        log.info("存储到数据库的主色调: {}", picture.getPicColor()); // 添加日志
 
         // 开启事务
         Long finalSpaceId = spaceId;

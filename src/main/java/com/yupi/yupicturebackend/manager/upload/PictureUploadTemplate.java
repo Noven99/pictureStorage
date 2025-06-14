@@ -14,6 +14,7 @@ import com.yupi.yupicturebackend.exception.BusinessException;
 import com.yupi.yupicturebackend.exception.ErrorCode;
 import com.yupi.yupicturebackend.manager.CosManager;
 import com.yupi.yupicturebackend.model.dto.file.UploadPictureResult;
+import com.yupi.yupicturebackend.utils.OptimizedMainColorCalculator;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Resource;
@@ -48,28 +49,38 @@ public abstract class PictureUploadTemplate {
         try {
             // 3. 创建临时文件
             file = File.createTempFile(uploadPath, null);
+            log.info("临时文件已创建，路径: {}", file.getAbsolutePath()); // 添加日志记录文件路径
             // 处理文件来源（本地或 URL）
             processFile(inputSource, file);
 
             // 4. 上传图片到对象存储
             PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
+            log.info("图片已上传到对象存储，路径: {}", uploadPath); // 添加上传路径日志
             // 5. 封装返回结果
             ImageInfo  imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
 
             ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
             List<CIObject> objectList = processResults.getObjectList();
+            UploadPictureResult uploadPictureResult;
             if (CollUtil.isNotEmpty(objectList)) {
-                //获取压缩之后得到的文件信息
+                // 获取压缩图、缩略图
                 CIObject compressedCiObject = objectList.get(0);
-                CIObject thumbnailCiObject = compressedCiObject;//缩略图默认等于压缩图
-                if (objectList.size() > 1) {
-                    thumbnailCiObject = objectList.get(1);
-                }
-                // 封装压缩图返回结果
-                return buildResult(originFilename, compressedCiObject, thumbnailCiObject, imageInfo);
+                CIObject thumbnailCiObject  = objectList.size() > 1 ? objectList.get(1) : compressedCiObject;
+
+                // 传入真实的临时文件 file（新增参数）
+                uploadPictureResult = buildResult(originFilename,
+                        compressedCiObject,
+                        thumbnailCiObject,
+                        imageInfo,
+                        file);
+            } else {
+                // 没有经过数据万象处理时走原来的逻辑
+                uploadPictureResult = buildResult(originFilename,
+                        file,
+                        uploadPath,
+                        imageInfo);
             }
-            // 封装原图返回结果
-            return buildResult(originFilename, file, uploadPath, imageInfo);
+            return uploadPictureResult;
         } catch (Exception e) {
             log.error("图片上传到对象存储失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Upload failed");
@@ -89,7 +100,7 @@ public abstract class PictureUploadTemplate {
      * @return
      */
     private UploadPictureResult buildResult(String originalFilename, CIObject compressedCiObject, CIObject thumbnailCiObject,
-                                            ImageInfo imageInfo) {
+                                            ImageInfo imageInfo, File tempFile) {
         // 计算宽高
         int picWidth = compressedCiObject.getWidth();
         int picHeight = compressedCiObject.getHeight();
@@ -104,7 +115,19 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicHeight(picHeight);
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(compressedCiObject.getFormat());
-        uploadPictureResult.setPicColor(imageInfo.getAve());
+//        uploadPictureResult.setPicColor(imageInfo.getAve());
+
+        // 计算主色调——关键修复点：使用真正的临时文件
+        try {
+            log.info("开始计算主色调，临时文件路径: {}", tempFile.getAbsolutePath());
+            String mainColor = OptimizedMainColorCalculator.calculateMainColor(tempFile);
+            log.info("计算完成的主色调: {}", mainColor);
+            uploadPictureResult.setPicColor(mainColor);
+        } catch (Exception e) {
+            log.error("主色调计算失败，设置为默认值 #000000", e);
+            uploadPictureResult.setPicColor("#000000");
+        }
+
         // 设置缩略图地址
         uploadPictureResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
         // 返回可访问的地址
@@ -150,7 +173,19 @@ public abstract class PictureUploadTemplate {
         uploadPictureResult.setPicHeight(picHeight);
         uploadPictureResult.setPicScale(picScale);
         uploadPictureResult.setPicFormat(imageInfo.getFormat());
-        uploadPictureResult.setPicColor(imageInfo.getAve());
+//        uploadPictureResult.setPicColor(imageInfo.getAve());
+
+        // 使用自定义主色调计算方法
+        try {
+            log.info("开始计算主色调，临时文件路径: {}", file.getAbsolutePath());
+            String mainColor = OptimizedMainColorCalculator.calculateMainColor(file); // 使用正确的临时文件
+            log.info("计算完成的主色调: {}", mainColor);
+            uploadPictureResult.setPicColor(mainColor);
+        } catch (Exception e) {
+            log.error("主色调计算失败，设置为默认值 #000000", e);
+            uploadPictureResult.setPicColor("#000000");
+        }
+
         // 返回可访问的地址
         return uploadPictureResult;
     }
