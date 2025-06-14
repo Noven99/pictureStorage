@@ -26,10 +26,9 @@
 ## 🚀 技术栈
 
 - **后端**：Spring Boot、MySQL、Redis
-- **前端**：React、TailwindCSS
-- **云服务**：阿里云 OSS（对象存储服务）
-- **图片处理**：ImageMagick、OpenCV
-- **实时协作**：WebSocket、Socket.IO
+- **前端**：Vue
+- **云服务**：腾讯云 OSS（对象存储服务）
+- **实时协作**：WebSocket
 
 ---
 
