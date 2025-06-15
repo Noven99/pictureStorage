@@ -9,7 +9,7 @@ server:
 
 spring:
   application:
-    name: yu-picture-backend
+    name: pictureStorage
     #数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -54,7 +54,7 @@ spring:
             type: CLASS_BASED
             props:
               strategy: standard
-              algorithmClassName: com.yupi.yupicturebackend.manager.sharding.PictureShardingAlgorithm
+              algorithmClassName: com.Hao.Storage.manager.sharding.PictureShardingAlgorithm
     props:
       sql-show: true
 
@@ -97,6 +97,6 @@ knife4j:
         group-name: default
         api-rule: package
         api-rule-resources:
-          - com.yupi.yupicturebackend.controller
+          - com.Hao.Storage.controller
 
 
